@@ -21,52 +21,39 @@ var LineBot = function (accessToken) {
     return this.lineClient.getProfile(user_id);
   }
 
-  this.follow = function (user_id, timestamp) {
-    var userProfileObj = {
-      userId: user_id
-    };
-    return this.getUserProfile(user_id).then(function (profile) {
-      userProfileObj = Object.assign(userProfileObj, profile);
-      return dynamodb.getPromise("users", {
-        user_id: user_id
-      });
-    }).then(function (userData) {
-      if (userData.Item) {
-        var updateObject = {
-          updated_at: timestamp
-        }
-        updateObject[applicationName] = userStatusEnum.follow
-        return dynamodb.updatePromise("users", {
-          user_id: user_id
-        }, updateObject);
-      } else {
-        var insertObject = {
-          user_id: userProfileObj.userId,
-          name: userProfileObj.displayName,
-          icon_url: userProfileObj.pictureUrl,
-          description: userProfileObj.statusMessage,
-          updated_at: timestamp
-        }
-        insertObject[applicationName] = userStatusEnum.follow
-        return dynamodb.createPromise("users", insertObject);
+  this.follow = async function (user_id, timestamp) {
+    const profile = await this.getUserProfile(user_id);
+    const userProfileObj = Object.assign({userId: user_id}, profile);
+    const userData = await dynamodb.getPromise("users", {user_id: user_id});
+    if (userData.Item) {
+      const updateObject = {
+        updated_at: timestamp
       }
-    });
+      updateObject[applicationName] = userStatusEnum.follow
+      return dynamodb.updatePromise("users", {user_id: user_id}, updateObject);
+    } else {
+      const insertObject = {
+        user_id: userProfileObj.userId,
+        name: userProfileObj.displayName,
+        icon_url: userProfileObj.pictureUrl,
+        description: userProfileObj.statusMessage,
+        updated_at: timestamp
+      }
+      insertObject[applicationName] = userStatusEnum.follow
+      return dynamodb.createPromise("users", insertObject);
+    }
   }
 
-  this.unfollow = function (user_id, timestamp) {
-    return dynamodb.getPromise("users", {
-      user_id: user_id
-    }).then(function (userData) {
-      if (userData.Item) {
-        var updateObject = {
-          updated_at: timestamp
-        }
-        updateObject[applicationName] = userStatusEnum.unfollow
-        return dynamodb.updatePromise("users", {
-          user_id: user_id
-        }, updateObject);
+  this.unfollow = async function (user_id, timestamp) {
+    const userData = await dynamodb.getPromise("users", { user_id: user_id });
+    if (userData.Item) {
+      var updateObject = {
+        updated_at: timestamp
       }
-    });
+      updateObject[applicationName] = userStatusEnum.unfollow
+      return dynamodb.updatePromise("users", {user_id: user_id}, updateObject);
+    }
+    return false;
   }
 
   this.linkRichMenu = function (userId, richMenuId) {
