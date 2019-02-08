@@ -1,0 +1,22 @@
+{
+  "name": "lost_mutual_notifier",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "TakuKobayashi",
+  "private": true,
+  "dependencies": {
+    "@line/bot-sdk": "*",
+    "aws-sdk": "*",
+    "request": "*",
+    "querystring": "*",
+    "underscore": "*",
+    "underscore.string": "*",
+    "dotenv": "*",
+    "express": "*",
+    "nodemon": "*"
+  },
+  "license": "MIT"
+}
